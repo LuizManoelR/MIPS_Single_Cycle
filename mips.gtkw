@@ -1,0 +1,55 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Sun Feb 01 16:54:28 2026
+[*]
+[dumpfile] "C:\Users\LuizM\OneDrive\Documentos\scripts\teste verilog\mips.vcd"
+[dumpfile_mtime] "Sun Feb 01 16:29:31 2026"
+[dumpfile_size] 167842
+[savefile] "C:\Users\LuizM\OneDrive\Documentos\scripts\teste verilog\mips.gtkw"
+[timestart] 166120
+[size] 1440 829
+[pos] -1 -1
+*-11.000000 7803 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tb_mips_single_cycle.
+[treeopen] tb_mips_single_cycle.mips.
+[sst_width] 197
+[signals_width] 174
+[sst_expanded] 1
+[sst_vpaned_height] 234
+@23
+tb_mips_single_cycle.mips.fetch.instruction[31:0]
+@420
+tb_mips_single_cycle.mips.alu.result[31:0]
+@24
+tb_mips_single_cycle.mips.alu.A[31:0]
+tb_mips_single_cycle.mips.alu.B[31:0]
+tb_mips_single_cycle.mips.registradores.ReadData1[31:0]
+tb_mips_single_cycle.mips.registradores.ReadData2[31:0]
+tb_mips_single_cycle.mips.registradores.readRegister1[4:0]
+tb_mips_single_cycle.mips.registradores.readRegister2[4:0]
+tb_mips_single_cycle.mips.registradores.WriteRegister[4:0]
+tb_mips_single_cycle.mips.registradores.WriteData[31:0]
+@28
+tb_mips_single_cycle.mips.controller.MemtoReg[1:0]
+tb_mips_single_cycle.mips.controller.ALUSrc
+@22
+tb_mips_single_cycle.mips.signExtend_inst.in[15:0]
+@24
+tb_mips_single_cycle.mips.signExtend_inst.out[31:0]
+@28
+tb_mips_single_cycle.mips.reset
+tb_mips_single_cycle.mips.alu.entrada_ctrl[3:0]
+tb_mips_single_cycle.mips.alu.op_en[5:0]
+tb_mips_single_cycle.mips.alu_ctrl.aluOp[1:0]
+@22
+tb_mips_single_cycle.mips.alu_ctrl.funct[5:0]
+@28
+tb_mips_single_cycle.mips.controller.Branch
+tb_mips_single_cycle.mips.controller.Jump
+tb_mips_single_cycle.mips.fetch.pcWrite
+tb_mips_single_cycle.mips.mult_ctrl.is_mult
+tb_mips_single_cycle.mips.mult_ctrl.mult_busy
+tb_mips_single_cycle.reset
+tb_mips_single_cycle.clk
+[pattern_trace] 1
+[pattern_trace] 0
