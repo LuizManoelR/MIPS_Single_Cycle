@@ -28,50 +28,74 @@ O processador contempla o modelo clássico de ciclo único, no qual cada instru�
 
 Como diferencial, a instrução multu foi implementada por meio de uma unidade sequencial baseada no algoritmo shift-and-add, utilizando registradores HI e LO para armazenamento do resultado.
 
-Trata-se de um modelo acadêmico com finalidade didática, não contemplando técnicas como pipeline, cache ou execução fora de ordem.     
+Trata-se de um modelo acadêmico com finalidade didática, não contemplando técnicas como pipeline, cache ou execução fora de ordem.  
+
+## Estrutura do Projeto
+
+- **src/** – Implementação dos módulos do processador em Verilog (datapath, ALU, controle, memória e multiplicador).
+- **tb/** – Testbench utilizado para simulação do processador.
+- **instrucoes.hex** – Programa em formato hexadecimal carregado na memória de instruções.
+- **Makefile** – Automatiza compilação e execução da simulação.
+- **mips.gtkw** – Arquivo de configuração do GTKWave para visualização dos sinais.
+
+
+```
+MIPS_Single_Cycle/
+│
+├── instrucoes.hex
+├── Makefile
+├── mips.gtkw
+├── README.md
+│
+├── src/
+│   ├── addPc.v
+│   ├── alu_32.v
+│   ├── alu_ctrl.v
+│   ├── and32.v
+│   ├── controller.v
+│   ├── DataMemory.v
+│   ├── fechtUnit.v
+│   ├── full_adder.v
+│   ├── HiLo.v
+│   ├── inst_memory.v
+│   ├── mips_single_cycle.v
+│   ├── multiplicador.v
+│   ├── mult_ctrl.v
+│   ├── nor32.v
+│   ├── or32.v
+│   ├── registradores.v
+│   ├── SignExtend.v
+│   ├── slt32.v
+│   ├── somador_32bits.v
+│   └── sub32.v
+│
+└── tb/
+    └── tb_mips_single_cycle.v
+```
 
 ## Arquitetura do Processador
 
-### As 5 etapas do Processador 
 
-Embora o processador seja de ciclo único, o fluxo da instrução segue conceitualmente as cinco fases clássicas da arquitetura MIPS (IF, ID, EX, MEM e WB), todas executadas dentro de um único ciclo de clock.
 
-1. **IF** (Instruction Fetch - Busca de Instrução):
-   - O processador lê a instrução da memória de instruções usando o endereço contido no Program Counter (PC).
-     
-2. **ID** (Instruction Decode - Decodificação e Leitura de Registradores):
-   - O processador identifica a operação a ser realizada e, simultaneamente, lê os conteúdos dos registradores de origem no banco de registradores.
-     
-3. **EX** (Execution - Execução ou Cálculo de Endereço):
-   - A Unidade Lógica e Aritmética (ALU) opera sobre os dados lidos do banco de registradores ou sobre o valor imediato.
-     
-4. **MEM** (Memory Access - Acesso à Memória):
-   - Etapa de acesso à memoria, podendo carregar ou armazenar dados em memoria.
-     
-5. **WB** (Write-Back - Escrita de Retorno):
-   - O resultado final da operação (seja ele vindo da ALU ou da memória de dados) é escrito de volta no banco de registradores.
-     
+    
 ## Instruções Implementadas
 
-### Tipo R
-- add
-- sub
-- and
-- or
-- slt
-- multu
-- mfhi
-- mflo
-
-### Tipo I
-- lw
-- sw
-- beq
-- addi
-- slti
-
-### Tipo J
-- j
+| Tipo | Instrução | Opcode | Funct | Descrição |
+|:---:|:---:|:---:|:---:|:---|
+| R | add | 000000 | 100000 | Soma o conteúdo de dois registradores (`rs + rt`) e armazena o resultado em `rd`. |
+| R | sub | 000000 | 100010 | Subtrai o conteúdo de dois registradores (`rs - rt`) e armazena o resultado em `rd`. |
+| R | and | 000000 | 100100 | Realiza a operação lógica AND bit a bit entre `rs` e `rt`. |
+| R | or | 000000 | 100101 | Realiza a operação lógica OR bit a bit entre `rs` e `rt`. |
+| R | slt | 000000 | 101010 | Compara `rs` e `rt`. Se `rs < rt`, grava `1` em `rd`; caso contrário grava `0`. |
+| R | multu | 000000 | 011001 | Multiplica dois registradores sem sinal. O resultado de 64 bits é armazenado nos registradores `HI` e `LO`. |
+| R | mfhi | 000000 | 010000 | Move o conteúdo do registrador especial `HI` para um registrador geral. |
+| R | mflo | 000000 | 010010 | Move o conteúdo do registrador especial `LO` para um registrador geral. |
+| I | lw | 100011 | — | Carrega uma palavra da memória (`Memory[rs + offset]`) para um registrador. |
+| I | sw | 101011 | — | Armazena uma palavra de um registrador na memória (`Memory[rs + offset]`). |
+| I | beq | 000100 | — | Realiza desvio se `rs` for igual a `rt`. |
+| I | addi | 001000 | — | Soma um valor imediato ao registrador `rs` e armazena o resultado em `rt`. |
+| I | slti | 001010 | — | Compara `rs` com um valor imediato. Se `rs` for menor, `rt` recebe `1`; caso contrário `0`. |
+| J | j | 000010 | — | Realiza salto incondicional para um endereço de destino. |
 
 ## Sinais de Controle
 
@@ -144,6 +168,26 @@ Embora o processador seja de ciclo único, o fluxo da instrução segue conceitu
 
  
 ## Fluxo de Execução
+
+### As 5 etapas do Processador 
+
+Embora o processador seja de ciclo único, o fluxo da instrução segue conceitualmente as cinco fases clássicas da arquitetura MIPS (IF, ID, EX, MEM e WB), todas executadas dentro de um único ciclo de clock.
+
+1. **IF** (Instruction Fetch - Busca de Instrução):
+   - O processador lê a instrução da memória de instruções usando o endereço contido no Program Counter (PC).
+     
+2. **ID** (Instruction Decode - Decodificação e Leitura de Registradores):
+   - O processador identifica a operação a ser realizada e, simultaneamente, lê os conteúdos dos registradores de origem no banco de registradores.
+     
+3. **EX** (Execution - Execução ou Cálculo de Endereço):
+   - A Unidade Lógica e Aritmética (ALU) opera sobre os dados lidos do banco de registradores ou sobre o valor imediato.
+     
+4. **MEM** (Memory Access - Acesso à Memória):
+   - Etapa de acesso à memoria, podendo carregar ou armazenar dados em memoria.
+     
+5. **WB** (Write-Back - Escrita de Retorno):
+   - O resultado final da operação (seja ele vindo da ALU ou da memória de dados) é escrito de volta no banco de registradores.
+
 ## Decisões de Projeto
 ## Programa Assembly
 
@@ -187,3 +231,16 @@ add $v0,$t4,$zero
 | 01801020  | 00000001100000000100000000100000       | 000000 | 01100 | 00000 | 01000 | 00000 | 100000 | R    | add  $8,$12,$0     |
 ## Simulação e Validação
 ## Como Executar
+
+
+Visão Geral
+Arquitetura do Processador
+Estrutura do Projeto
+Instruções Implementadas
+Sinais de Controle
+Fluxo de Execução
+Decisões de Projeto
+Limitações do Projeto
+Programa Assembly
+Simulação e Validação
+Como Executar
