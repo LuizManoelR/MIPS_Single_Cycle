@@ -60,6 +60,8 @@ Embora o processador seja de ciclo único, o fluxo da instrução segue conceitu
 - or
 - slt
 - multu
+- mfhi
+- mflo
 
 ### Tipo I
 - lw
@@ -72,6 +74,75 @@ Embora o processador seja de ciclo único, o fluxo da instrução segue conceitu
 - j
 
 ## Sinais de Controle
+
+- RegDst 
+
+  - seleciona registrador destino (rd ou rt)
+
+- ALUSrc
+ 
+  - define se ALU usa registrador ou imediato
+
+- MemtoReg 
+
+  - define de qual fonte será a escrita do registrador
+
+- RegWrite 
+ 
+  - habilita escrita no banco de registradores
+
+- MemRead 
+
+  - leitura da memória
+
+- MemWrite 
+
+  - escrita na memória
+
+- Branch 
+ 
+   - habilita branch
+
+- Jump 
+
+   - habilita jump
+
+- HiLoWrite
+
+  - habilita escrita nos registradores Hi/Lo
+ 
+- Start
+
+  - inicia a multiplicação
+ 
+- Reset_mult
+
+  - reinicializa o modulo de multiplicação
+ 
+- PcWrite
+
+   - habiita a escrita no pc
+
+- ALUOp
+
+  - operação da ALU (controla o ALU Control
+
+ <br>
+
+| Instrução | RegDst | ALUSrc | MemtoReg | RegWrite | MemRead | MemWrite | Branch | Jump | ALUOp | PcWrite|
+|:----------:|:--------:|:--------:|:----------:|:----------:|:---------:|:----------:|:--------:|:------:|:-------:|:--------:|
+| R-type   |   1    |   0    |    00    |    1     |   0     |    0     |   0    |  0   | 10    |  1     |
+| lw       |   0    |   1    |    01    |    1     |   1     |    0     |   0    |  0   | 00    |  1     |
+| sw       |   X    |   1    |    XX    |    0     |   0     |    1     |   0    |  0   | 00    |  1     |
+| beq      |   X    |   0    |    XX    |    0     |   0     |    0     |   1    |  0   | 01    |  1     |
+| addi     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 00    |  1     |
+| slti     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 11    |  1     |
+| j        |   X    |   X    |    XX    |    0     |   0     |    0     |   0    |  1   | XX    |  1     |
+| multu    |   X    |   0    |    XX    |    0     |   0     |    0     |   0    |  0   | 00    |  0     |
+| mfhi     |   1    |   X    |    10    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
+| mflo     |   1    |   X    |    11    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
+
+ 
 ## Fluxo de Execução
 ## Decisões de Projeto
 ## Programa Assembly
