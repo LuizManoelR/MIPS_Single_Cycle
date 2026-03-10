@@ -75,6 +75,9 @@ MIPS_Single_Cycle/
 
 ## Arquitetura do Processador
 
+<img width="2232" height="1918" alt="diagrama dapath base url drawio" src="https://github.com/user-attachments/assets/7a92dce6-b60d-450f-8f5b-9ec4445b8c83" />
+
+<img width="2232" height="2180" alt="Bloco de anotações de Luiz url drawio" src="https://github.com/user-attachments/assets/ee957a45-7116-48cf-b6f4-d178809c5899" />
 
 
     
