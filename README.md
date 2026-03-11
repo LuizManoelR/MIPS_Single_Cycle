@@ -75,13 +75,112 @@ MIPS_Single_Cycle/
 
 ## Arquitetura do Processador
 
+## Datapath
 <img width="2232" height="1918" alt="diagrama dapath base url drawio" src="https://github.com/user-attachments/assets/7a92dce6-b60d-450f-8f5b-9ec4445b8c83" />
 
 <img width="2232" height="2180" alt="Bloco de anotações de Luiz url drawio" src="https://github.com/user-attachments/assets/ee957a45-7116-48cf-b6f4-d178809c5899" />
 
+### Sinais de Controle
 
+- RegDst 
+
+  - Seleciona registrador destino (rd ou rt).
+
+- ALUSrc
+ 
+  - Define se ALU usa registrador ou imediato como segundo operando.
+
+- MemtoReg 
+
+  - Seleciona de qual fonte será o dado a ser escrito no registrador.
+
+- RegWrite 
+ 
+  - Habilita escrita no banco de registradores
+
+- MemRead 
+
+  - Habilita leitura da memória.
+
+- MemWrite 
+
+  - Habilita escrita em memória.
+
+- Branch 
+ 
+   - Habilita branch.
+
+- Jump 
+
+   - habilita Jump.
+
+- HiLoWrite
+
+  - Habilita escrita nos registradores Hi/Lo.
+ 
+- Start
+
+  - Inicia a multiplicação
+ 
+- Reset_mult
+
+  - Reinicializa o módulo de multiplicação.
+ 
+- PcWrite
+
+   - Habiita a escrita no registrador Program Counter.
+
+- ALUOp
+
+  - Indica para o `AluControl` qual operação deverá ser executada na `ALU` de acordo com a instrução buscada.
     
-## Instruções Implementadas
+ <br>
+
+| Instrução | RegDst | ALUSrc | MemtoReg | RegWrite | MemRead | MemWrite | Branch | Jump | ALUOp | PcWrite|
+|:----------:|:--------:|:--------:|:----------:|:----------:|:---------:|:----------:|:--------:|:------:|:-------:|:--------:|
+| R-type   |   1    |   0    |    00    |    1     |   0     |    0     |   0    |  0   | 10    |  1     |
+| lw       |   0    |   1    |    01    |    1     |   1     |    0     |   0    |  0   | 00    |  1     |
+| sw       |   X    |   1    |    XX    |    0     |   0     |    1     |   0    |  0   | 00    |  1     |
+| beq      |   X    |   0    |    XX    |    0     |   0     |    0     |   1    |  0   | 01    |  1     |
+| addi     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 00    |  1     |
+| slti     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 11    |  1     |
+| j        |   X    |   X    |    XX    |    0     |   0     |    0     |   0    |  1   | XX    |  1     |
+| multu    |   X    |   0    |    XX    |    0     |   0     |    0     |   0    |  0   | 10    |  0     |
+| mfhi     |   1    |   X    |    10    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
+| mflo     |   1    |   X    |    11    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
+
+### Sinais de Estado
+
+Como a instrução `multu` foi implementada por meio de uma unidade sequencial baseada no algoritmo **shift-and-add**, foi necessário implentar alguns sinais de estado em sua construção.
+
+Diferentemente das demais instruções do processador, que são concluídas em um único ciclo, a multiplicação é realizada ao longo de múltiplos ciclos. Dessa forma, esses sinais permitem que a unidade de controle acompanhe o progresso da operação e saiba quando o resultado está disponível.
+
+- **MultBusy**
+
+  - Indica que a unidade de multiplicação está ocupada executando uma operação.
+
+- **Done**
+
+  - Indica que a operação de multiplicação foi finalizada.
+
+### Estados da Multiplicação
+
+A execução da multiplicação é controlada por uma pequena máquina de estados finitos (FSM), responsável por iniciar o cálculo, acompanhar sua execução e armazenar o resultado final.
+
+ <br>
+ 
+| Estado | PcWrite | MultReset | Start | HiLoWrite | MultBusy | Done | Descrição |
+|:------:|:-------:|:---------:|:-----:|:---------:|:--------:|:----:|:-----------|
+| Idle | 1 | 1 | 0 | 0 | 0 | 0 | Estado inicial. O módulo aguarda a execução da instrução `multu`. |
+| Start | 0 | 0 | 1 | 0 | 1 | 0 | A multiplicação é iniciada e os operandos são carregados nos registradores internos. |
+| Execute | 0 | 0 | 0 | 0 | 1 | 0 | O algoritmo de multiplicação é executado ao longo de vários ciclos. |
+| Done | 1 | 0 | 0 | 1 | 0 | 1 | A multiplicação foi concluída e o resultado é escrito nos registradores **HI** e **LO**. |
+
+ <br>
+ 
+### Instruções Implementadas
+
+ <br>
 
 | Tipo | Instrução | Opcode | Funct | Descrição |
 |:---:|:---:|:---:|:---:|:---|
@@ -100,76 +199,8 @@ MIPS_Single_Cycle/
 | I | slti | 001010 | — | Compara `rs` com um valor imediato. Se `rs` for menor, `rt` recebe `1`; caso contrário `0`. |
 | J | j | 000010 | — | Realiza salto incondicional para um endereço de destino. |
 
-## Sinais de Controle
-
-- RegDst 
-
-  - seleciona registrador destino (rd ou rt)
-
-- ALUSrc
- 
-  - define se ALU usa registrador ou imediato
-
-- MemtoReg 
-
-  - define de qual fonte será a escrita do registrador
-
-- RegWrite 
- 
-  - habilita escrita no banco de registradores
-
-- MemRead 
-
-  - leitura da memória
-
-- MemWrite 
-
-  - escrita na memória
-
-- Branch 
- 
-   - habilita branch
-
-- Jump 
-
-   - habilita jump
-
-- HiLoWrite
-
-  - habilita escrita nos registradores Hi/Lo
- 
-- Start
-
-  - inicia a multiplicação
- 
-- Reset_mult
-
-  - reinicializa o modulo de multiplicação
- 
-- PcWrite
-
-   - habiita a escrita no pc
-
-- ALUOp
-
-  - operação da ALU (controla o ALU Control
-
  <br>
 
-| Instrução | RegDst | ALUSrc | MemtoReg | RegWrite | MemRead | MemWrite | Branch | Jump | ALUOp | PcWrite|
-|:----------:|:--------:|:--------:|:----------:|:----------:|:---------:|:----------:|:--------:|:------:|:-------:|:--------:|
-| R-type   |   1    |   0    |    00    |    1     |   0     |    0     |   0    |  0   | 10    |  1     |
-| lw       |   0    |   1    |    01    |    1     |   1     |    0     |   0    |  0   | 00    |  1     |
-| sw       |   X    |   1    |    XX    |    0     |   0     |    1     |   0    |  0   | 00    |  1     |
-| beq      |   X    |   0    |    XX    |    0     |   0     |    0     |   1    |  0   | 01    |  1     |
-| addi     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 00    |  1     |
-| slti     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 11    |  1     |
-| j        |   X    |   X    |    XX    |    0     |   0     |    0     |   0    |  1   | XX    |  1     |
-| multu    |   X    |   0    |    XX    |    0     |   0     |    0     |   0    |  0   | 00    |  0     |
-| mfhi     |   1    |   X    |    10    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
-| mflo     |   1    |   X    |    11    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
-
- 
 ## Fluxo de Execução
 
 ### As 5 etapas do Processador 
@@ -190,6 +221,9 @@ Embora o processador seja de ciclo único, o fluxo da instrução segue conceitu
      
 5. **WB** (Write-Back - Escrita de Retorno):
    - O resultado final da operação (seja ele vindo da ALU ou da memória de dados) é escrito de volta no banco de registradores.
+
+
+    
 
 ## Decisões de Projeto
 ## Programa Assembly
