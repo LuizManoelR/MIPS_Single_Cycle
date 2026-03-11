@@ -75,7 +75,7 @@ MIPS_Single_Cycle/
 
 ## Arquitetura do Processador
 
-## Datapath
+### Datapath
 <img width="2232" height="1918" alt="diagrama dapath base url drawio" src="https://github.com/user-attachments/assets/7a92dce6-b60d-450f-8f5b-9ec4445b8c83" />
 
 <img width="2232" height="2180" alt="Bloco de anotações de Luiz url drawio" src="https://github.com/user-attachments/assets/ee957a45-7116-48cf-b6f4-d178809c5899" />
@@ -134,20 +134,6 @@ MIPS_Single_Cycle/
 
   - Indica para o `AluControl` qual operação deverá ser executada na `ALU` de acordo com a instrução buscada.
     
- <br>
-
-| Instrução | RegDst | ALUSrc | MemtoReg | RegWrite | MemRead | MemWrite | Branch | Jump | ALUOp | PcWrite|
-|:----------:|:--------:|:--------:|:----------:|:----------:|:---------:|:----------:|:--------:|:------:|:-------:|:--------:|
-| R-type   |   1    |   0    |    00    |    1     |   0     |    0     |   0    |  0   | 10    |  1     |
-| lw       |   0    |   1    |    01    |    1     |   1     |    0     |   0    |  0   | 00    |  1     |
-| sw       |   X    |   1    |    XX    |    0     |   0     |    1     |   0    |  0   | 00    |  1     |
-| beq      |   X    |   0    |    XX    |    0     |   0     |    0     |   1    |  0   | 01    |  1     |
-| addi     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 00    |  1     |
-| slti     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 11    |  1     |
-| j        |   X    |   X    |    XX    |    0     |   0     |    0     |   0    |  1   | XX    |  1     |
-| multu    |   X    |   0    |    XX    |    0     |   0     |    0     |   0    |  0   | 10    |  0     |
-| mfhi     |   1    |   X    |    10    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
-| mflo     |   1    |   X    |    11    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
 
 ### Sinais de Estado
 
@@ -201,9 +187,30 @@ A execução da multiplicação é controlada por uma pequena máquina de estado
 
  <br>
 
-## Fluxo de Execução
+ ### Sinais de Controle por Instrução
 
-### As 5 etapas do Processador 
+A tabela a seguir apresenta a configuração dos principais sinais de controle gerados pela unidade de controle para cada instrução suportada pelo processador.
+
+ <br>
+
+| Instrução | RegDst | ALUSrc | MemtoReg | RegWrite | MemRead | MemWrite | Branch | Jump | ALUOp | PcWrite|
+|:----------:|:--------:|:--------:|:----------:|:----------:|:---------:|:----------:|:--------:|:------:|:-------:|:--------:|
+| R-type   |   1    |   0    |    00    |    1     |   0     |    0     |   0    |  0   | 10    |  1     |
+| lw       |   0    |   1    |    01    |    1     |   1     |    0     |   0    |  0   | 00    |  1     |
+| sw       |   X    |   1    |    XX    |    0     |   0     |    1     |   0    |  0   | 00    |  1     |
+| beq      |   X    |   0    |    XX    |    0     |   0     |    0     |   1    |  0   | 01    |  1     |
+| addi     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 00    |  1     |
+| slti     |   0    |   1    |    00    |    1     |   0     |    0     |   0    |  0   | 11    |  1     |
+| j        |   X    |   X    |    XX    |    0     |   0     |    0     |   0    |  1   | XX    |  1     |
+| multu    |   X    |   0    |    XX    |    0     |   0     |    0     |   0    |  0   | 10    |  0     |
+| mfhi     |   1    |   X    |    10    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
+| mflo     |   1    |   X    |    11    |    1     |   0     |    0     |   0    |  0   | XX    |  1     |
+
+<br>
+
+### Fluxo de Execução
+
+#### As 5 etapas do Processador 
 
 Embora o processador seja de ciclo único, o fluxo da instrução segue conceitualmente as cinco fases clássicas da arquitetura MIPS (IF, ID, EX, MEM e WB), todas executadas dentro de um único ciclo de clock.
 
