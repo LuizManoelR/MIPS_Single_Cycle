@@ -209,26 +209,11 @@ A tabela a seguir apresenta a configuração dos principais sinais de controle g
 
 ### Fluxo de Execução
 
-Embora o processador seja de ciclo único, o fluxo da instrução segue conceitualmente as cinco fases clássicas da arquitetura MIPS (IF, ID, EX, MEM e WB), todas executadas dentro de um único ciclo de clock.
-
-1. **IF** (Instruction Fetch - Busca de Instrução):
-   - O processador lê a instrução da memória de instruções usando o endereço contido no Program Counter (PC).
-     
-2. **ID** (Instruction Decode - Decodificação e Leitura de Registradores):
-   - O processador identifica a operação a ser realizada e, simultaneamente, lê os conteúdos dos registradores de origem no banco de registradores.
-     
-3. **EX** (Execution - Execução ou Cálculo de Endereço):
-   - A Unidade Lógica e Aritmética (ALU) opera sobre os dados lidos do banco de registradores ou sobre o valor imediato.
-     
-4. **MEM** (Memory Access - Acesso à Memória):
-   - Etapa de acesso à memoria, podendo carregar ou armazenar dados em memoria.
-     
-5. **WB** (Write-Back - Escrita de Retorno):
-   - O resultado final da operação (seja ele vindo da ALU ou da memória de dados) é escrito de volta no banco de registradores.
+Embora o processador seja de ciclo único, o fluxo da instrução segue conceitualmente as cinco fases clássicas da arquitetura MIPS (IF, ID, EX, MEM e WB), todas executadas dentro de um único ciclo de clock com exceção da instrução `multu`.
 
 <br>
 
-<img width="2232" height="2192" alt="digrama por etapas  url drawio" src="https://github.com/user-attachments/assets/2dc3be26-b22c-4667-b153-40d6dcd81342" />
+<img width="2232" height="2190" alt="digrama por etapas  url drawio" src="https://github.com/user-attachments/assets/bf8aff77-4367-4fba-8e1a-f59114a2146c" />
 
 
 ## Programa Assembly
@@ -275,12 +260,6 @@ add $v0,$t4,$zero
 ## Como Executar
 
 
-Visão Geral
-Arquitetura do Processador
-Estrutura do Projeto
-Instruções Implementadas
-Sinais de Controle
-Fluxo de Execução
 Decisões de Projeto
 Limitações do Projeto
 Programa Assembly
