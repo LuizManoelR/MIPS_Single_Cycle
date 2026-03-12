@@ -76,9 +76,8 @@ MIPS_Single_Cycle/
 ## Arquitetura do Processador
 
 ### Datapath
-<img width="2232" height="1918" alt="diagrama dapath base url drawio" src="https://github.com/user-attachments/assets/7a92dce6-b60d-450f-8f5b-9ec4445b8c83" />
 
-<img width="2232" height="2180" alt="Bloco de anotações de Luiz url drawio" src="https://github.com/user-attachments/assets/ee957a45-7116-48cf-b6f4-d178809c5899" />
+<img width="2232" height="2180" alt="Diagrama" src="https://github.com/user-attachments/assets/ee957a45-7116-48cf-b6f4-d178809c5899" />
 
 ### Sinais de Controle
 
@@ -210,8 +209,6 @@ A tabela a seguir apresenta a configuração dos principais sinais de controle g
 
 ### Fluxo de Execução
 
-#### As 5 etapas do Processador 
-
 Embora o processador seja de ciclo único, o fluxo da instrução segue conceitualmente as cinco fases clássicas da arquitetura MIPS (IF, ID, EX, MEM e WB), todas executadas dentro de um único ciclo de clock.
 
 1. **IF** (Instruction Fetch - Busca de Instrução):
@@ -229,10 +226,11 @@ Embora o processador seja de ciclo único, o fluxo da instrução segue conceitu
 5. **WB** (Write-Back - Escrita de Retorno):
    - O resultado final da operação (seja ele vindo da ALU ou da memória de dados) é escrito de volta no banco de registradores.
 
+<br>
 
-    
+<img width="2232" height="2192" alt="digrama por etapas  url drawio" src="https://github.com/user-attachments/assets/2dc3be26-b22c-4667-b153-40d6dcd81342" />
 
-## Decisões de Projeto
+
 ## Programa Assembly
 
 ```assembly
