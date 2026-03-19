@@ -218,50 +218,106 @@ Embora o processador seja de ciclo único, o fluxo da instrução segue conceitu
 
 ## Programa Assembly
 
+Para validar o datapath completo do processador, foi desenvolvido um algoritmo em Assembly MIPS que calcula o fatorial de um número (ex: `5! = 120`). Este programa foi escolhido especificamente para estressar a arquitetura e testar os seguintes pontos:
+
+* **Acesso à Memória:** Utiliza `lw` para buscar o valor inicial e `sw` para gravar o resultado, respeitando o alinhamento de 4 bytes.
+* **Saltos e Desvios:** Valida o recálculo do PC através de saltos incondicionais (`j`) e ramificações condicionais (`beq`).
+* **Sincronização (Stall):** Força o uso intensivo da instrução `multu` dentro de um laço de repetição, garantindo que a atualização do Program Counter seja inibida enquanto o cálculo de múltiplos ciclos é executado.
+
+### Código Assembly
 ```assembly
-
-addi $a0, $zero, 5
-addi $t1,$zero, 1
-add $t0, $zero, $a0
-addi $t4, $zero, 1
-j iteração
-
+# Inicialização e leitura da memória
+lw   $a0, 4($zero)        # Carrega o valor base (N) do endereço 4
+addi $t1, $zero, 1        # Constante de decremento (1)
+add  $t0, $zero, $a0      # Cópia iterativa de N
+addi $t4, $zero, 1        # Acumulador do fatorial
+j iteração                # Inicia o laço
 
 fatorial:
-multu $t4, $t0
-mflo $t4
-sub $t0, $t0, $t1
-
-j iteração
+multu $t4, $t0            # Acumulador = Acumulador * N (Gera Stall no PC)
+mflo $t4                  # Recupera o resultado de 32 bits do registrador LO
+sub  $t0, $t0, $t1        # N = N - 1
+j iteração                # Retorna ao laço
 
 iteração:
-slti $t2,$t0,2
-beq $t2,$zero,fatorial
+slti $t2, $t0, 2          # Condição de parada: verifica se N < 2
+beq  $t2, $zero, fatorial # Se N >= 2, continua multiplicando
 
-add $v0,$t4,$zero
+# Finalização e escrita na memória
+add  $v0, $t4, $zero      # Move o resultado final para o registrador de retorno
+sw   $v0, 8($zero)        # Salva o resultado no endereço 8 da Memória de Dados
 
 ```
 
-| HEX       | BINÁRIO                                | opcode | rs    | rt    | rd    | shamt | funct  | Tipo | Instrução          |
-|-----------|----------------------------------------|--------|-------|-------|-------|-------|--------|------|--------------------|
-| 20040005  | 00100000000001000000000000000101       | 001000 | 00000 | 00100 | ----- | ----- | -----  | I    | addi $4,$0,5       |
-| 20090001  | 00100000000010010000000000000001       | 001000 | 00000 | 01001 | ----- | ----- | -----  | I    | addi $9,$0,1       |
-| 00044020  | 00000000000001000100000000100000       | 000000 | 00000 | 00100 | 01000 | 00000 | 100000 | R    | add  $8,$0,$4      |
-| 200C0001  | 00100000000011000000000000000001       | 001000 | 00000 | 01100 | ----- | ----- | -----  | I    | addi $12,$0,1      |
-| 08100009  | 00001000000100000000000000001001       | 000010 | ----- | ----- | ----- | ----- | -----  | J    | j 0x00400009       |
-| 01880019  | 00000001100010000000000000011001       | 000000 | 01100 | 01000 | 00000 | 00000 | 011001 | R    | multu $12,$8       |
-| 00006012  | 00000000000000000110000000010010       | 000000 | 00000 | 00000 | 01100 | 00000 | 010010 | R    | mflo $12           |
-| 01094022  | 00000001000010010100000000100010       | 000000 | 01000 | 01001 | 01000 | 00000 | 100010 | R    | sub  $8,$8,$9      |
-| 08100009  | 00001000000100000000000000001001       | 000010 | ----- | ----- | ----- | ----- | -----  | J    | j 0x00400009       |
-| 290A0002  | 00101001000010100000000000000010       | 001010 | 01000 | 01010 | ----- | ----- | -----  | I    | slti $10,$8,2      |
-| 1140FFFA  | 00010001010000001111111111111010       | 000100 | 01010 | 00000 | ----- | ----- | -----  | I    | beq  $10,$0,-6     |
-| 01801020  | 00000001100000000100000000100000       | 000000 | 01100 | 00000 | 01000 | 00000 | 100000 | R    | add  $8,$12,$0     |
+### Tradução para Hexdecimal/Binário
+(A coluna Índice mapeia a instrução diretamente para a sua posição no array da Memória de Instruções).
+
+| Índice | HEX      | BINÁRIO                          | opcode | rs    | rt    | rd    | shamt | funct  | imm (bin / dec)             | addr                       | Tipo | Instrução                      |
+|:------:|----------|----------------------------------|:------:|:-----:|:-----:|:-----:|:-----:|:------:|:---------------------------:|:--------------------------:|:----:|--------------------------------|
+| 0      | 8C040004 | 10001100000001000000000000000100 | 100011 | 00000 | 00100 | ----- | ----- | -----  | 0000000000000100&nbsp;(4)   | -------------------------- | I    | lw&nbsp;$4,&nbsp;4($0)         |
+| 1      | 20090001 | 00100000000010010000000000000001 | 001000 | 00000 | 01001 | ----- | ----- | -----  | 0000000000000001&nbsp;(1)   | -------------------------- | I    | addi&nbsp;$9,&nbsp;$0,&nbsp;1  |
+| 2      | 00044020 | 00000000000001000100000000100000 | 000000 | 00000 | 00100 | 01000 | 00000 | 100000 | -------------------------- | -------------------------- | R    | add&nbsp;$8,&nbsp;$0,&nbsp;$4  |
+| 3      | 200C0001 | 00100000000011000000000000000001 | 001000 | 00000 | 01100 | ----- | ----- | -----  | 0000000000000001&nbsp;(1)   | -------------------------- | I    | addi&nbsp;$12,&nbsp;$0,&nbsp;1 |
+| 4      | 08100009 | 00001000000100000000000000001001 | 000010 | ----- | ----- | ----- | ----- | -----  | -------------------------- | 00000100000000000000001001 | J    | j&nbsp;0x00400009              |
+| 5      | 01880019 | 00000001100010000000000000011001 | 000000 | 01100 | 01000 | 00000 | 00000 | 011001 | -------------------------- | -------------------------- | R    | multu&nbsp;$12,&nbsp;$8        |
+| 6      | 00006012 | 00000000000000000110000000010010 | 000000 | 00000 | 00000 | 01100 | 00000 | 010010 | -------------------------- | -------------------------- | R    | mflo&nbsp;$12                  |
+| 7      | 01094022 | 00000001000010010100000000100010 | 000000 | 01000 | 01001 | 01000 | 00000 | 100010 | -------------------------- | -------------------------- | R    | sub&nbsp;$8,&nbsp;$8,&nbsp;$9  |
+| 8      | 08100009 | 00001000000100000000000000001001 | 000010 | ----- | ----- | ----- | ----- | -----  | -------------------------- | 00000100000000000000001001 | J    | j&nbsp;0x00400009              |
+| 9      | 290A0002 | 00101001000010100000000000000010 | 001010 | 01000 | 01010 | ----- | ----- | -----  | 0000000000000010&nbsp;(2)   | -------------------------- | I    | slti&nbsp;$10,&nbsp;$8,&nbsp;2 |
+| 10     | 1140FFFA | 00010001010000001111111111111010 | 000100 | 01010 | 00000 | ----- | ----- | -----  | 1111111111111010&nbsp;(-6)  | -------------------------- | I    | beq&nbsp;$10,&nbsp;$0,&nbsp;-6 |
+| 11     | 01801020 | 00000001100000000100000000100000 | 000000 | 01100 | 00000 | 00010 | 00000 | 100000 | -------------------------- | -------------------------- | R    | add&nbsp;$2,&nbsp;$12,&nbsp;$0 |
+| 12     | AC020008 | 10101100000000100000000000001000 | 101011 | 00000 | 00010 | ----- | ----- | -----  | 0000000000001000&nbsp;(8)   | -------------------------- | I    | sw&nbsp;$2,&nbsp;8($0)       |
+
+
 ## Simulação e Validação
+
 ## Como Executar
 
+### Requisitos
 
-Decisões de Projeto
-Limitações do Projeto
-Programa Assembly
-Simulação e Validação
-Como Executar
+Antes de iniciar, certifique-se de ter as seguintes ferramentas instaladas no seu ambiente:
+* **Icarus Verilog**: Compilar e simular.
+* **GTKWave**: Visualizar as formas de onda (waveforms).
+* **Makefile (Opcional)**: Utilitário para automação.
+
+----
+
+### Usando Icarus Verilog diretamente
+
+1.  **Compilar**:  
+    Execute o comando abaixo na raiz do projeto para gerar o executável:
+    ```powershell
+    iverilog -o mips.out src/*.v tb/tb_mips_single_cycle.v
+    ```
+
+2.  **Simular**:
+    ```powershell
+    vvp mips.out
+    ```
+
+3. **Visualizar Waveforms**:
+
+    ```poweshell
+    gtkwave mips.vcd mips.gtkw
+    ```
+
+---
+
+### Usando Makefile (Recomendado)
+
+
+1.  **Compilar e Simular**:
+    ```powershell
+    make
+    ```
+
+2.  **Visualizar Waveforms**:
+    ```powershell
+    make wave
+    ```
+
+3.  **Limpar arquivos**:
+    ```powershell
+    make clean
+    ```
+
