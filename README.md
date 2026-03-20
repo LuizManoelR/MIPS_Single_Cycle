@@ -79,78 +79,39 @@ MIPS_Single_Cycle/
 
 <img width="2232" height="2180" alt="Diagrama" src="https://github.com/user-attachments/assets/ee957a45-7116-48cf-b6f4-d178809c5899" />
 
-### Sinais de Controle
+### Sinais de Controle (Datapath e Memória)
 
-- RegDst 
+- **RegDst:** Comanda o MUX que seleciona qual campo da instrução (`rd` ou `rt`) indicará o registrador de destino para a escrita.
+- **ALUSrc:** Comanda o MUX que define a segunda entrada da ALU, selecionando entre o dado lido do banco de registradores ou o valor imediato (com sinal estendido).
+- **MemtoReg:** Comanda o MUX da etapa de *Write Back*, selecionando a origem do dado que será gravado no registrador (resultado da ALU, dado da Memória, valor de Hi ou valor de Lo).
+- **RegWrite:** Ativa a gravação do dado final no banco de registradores ao final do ciclo.
+- **MemRead:** Ativa a porta de leitura da Memória de Dados.
+- **MemWrite:** Ativa a porta de gravação da Memória de Dados.
+- **Branch:** Sinal que habilita o desvio condicional. Em conjunto com a flag `Zero` da ALU, ele comuta o MUX que altera o fluxo do PC.
+- **Jump:** Comanda o MUX superior para forçar o PC a carregar o endereço de salto incondicional (calculado na etapa de busca).
+- **PcWrite:** Ativa a atualização do registrador *Program Counter* (PC). É desabilitado temporariamente (gerando um *stall*) enquanto o multiplicador opera.
 
-  - Seleciona registrador destino (rd ou rt).
+### Sinais de Controle (Execução e Multiplicação)
 
-- ALUSrc
- 
-  - Define se ALU usa registrador ou imediato como segundo operando.
+- **ALUOp:** Código enviado ao bloco `ALU control` para definir a operação matemática ou delegar essa decisão ao campo `funct` da instrução.
+- **HiLoWrite:** Ativa a gravação do resultado final da multiplicação nos registradores especiais `Hi` e `Lo`.
+- **Start:** Pulso de comando que aciona a máquina de estados (FSM) do multiplicador, dando início ao cálculo iterativo.
+- **Reset_mult:** Sinal de reinicialização que zera a FSM e os registradores internos do módulo de multiplicação.
 
-- MemtoReg 
 
-  - Seleciona de qual fonte será o dado a ser escrito no registrador.
+### Sinais de Estado (Flags)
 
-- RegWrite 
- 
-  - Habilita escrita no banco de registradores
+Como a instrução `multu` foi implementada por meio de uma unidade sequencial baseada no algoritmo **shift-and-add**, tornou-se obrigatório o uso de sinais de estado (flags) para coordenar o tempo físico do processador. 
 
-- MemRead 
+Diferentemente das demais instruções da via de dados, que são concluídas na propagação de um único ciclo de clock, a multiplicação atravessa múltiplos ciclos. Esses sinais permitem que a Unidade de Controle trave a execução das próximas instruções até que o cálculo atual termine.
 
-  - Habilita leitura da memória.
+- **MultBusy:** Flag de status contínuo que indica que o multiplicador está ativamente realizando a operação. Enquanto estiver em nível alto, impede o avanço do PC.
+- **Done:** Flag de pulso único que sinaliza o fim exato da operação de multiplicação, avisando que o resultado já está disponível e o fluxo normal do processador pode ser retomado.
 
-- MemWrite 
-
-  - Habilita escrita em memória.
-
-- Branch 
- 
-   - Habilita branch.
-
-- Jump 
-
-   - habilita Jump.
-
-- HiLoWrite
-
-  - Habilita escrita nos registradores Hi/Lo.
- 
-- Start
-
-  - Inicia a multiplicação
- 
-- Reset_mult
-
-  - Reinicializa o módulo de multiplicação.
- 
-- PcWrite
-
-   - Habiita a escrita no registrador Program Counter.
-
-- ALUOp
-
-  - Indica para o `AluControl` qual operação deverá ser executada na `ALU` de acordo com a instrução buscada.
-    
-
-### Sinais de Estado
-
-Como a instrução `multu` foi implementada por meio de uma unidade sequencial baseada no algoritmo **shift-and-add**, foi necessário implentar alguns sinais de estado em sua construção.
-
-Diferentemente das demais instruções do processador, que são concluídas em um único ciclo, a multiplicação é realizada ao longo de múltiplos ciclos. Dessa forma, esses sinais permitem que a unidade de controle acompanhe o progresso da operação e saiba quando o resultado está disponível.
-
-- **MultBusy**
-
-  - Indica que a unidade de multiplicação está ocupada executando uma operação.
-
-- **Done**
-
-  - Indica que a operação de multiplicação foi finalizada.
 
 ### Estados da Multiplicação
 
-A execução da multiplicação é controlada por uma pequena máquina de estados finitos (FSM), responsável por iniciar o cálculo, acompanhar sua execução e armazenar o resultado final.
+A execução da multiplicação é orquestrada por uma Máquina de Estados Finitos (FSM) interna ao módulo, que gerencia os múltiplos ciclos de clock independentemente da Unidade de Controle principal. Ela é responsável por aguardar o comando de início, iterar os deslocamentos e somas do algoritmo, e sinalizar a conclusão do processo.
 
  <br>
  
@@ -249,7 +210,7 @@ sw   $v0, 8($zero)        # Salva o resultado no endereço 8 da Memória de Dado
 
 ```
 
-### Tradução para Hexdecimal/Binário
+### Tradução para Hexadecimal/Binário
 (A coluna Índice mapeia a instrução diretamente para a sua posição no array da Memória de Instruções).
 
 | Índice | HEX      | BINÁRIO                          | opcode | rs    | rt    | rd    | shamt | funct  | imm (bin / dec)             | addr                       | Tipo | Instrução                      |
@@ -297,7 +258,7 @@ Antes de iniciar, certifique-se de ter as seguintes ferramentas instaladas no se
 
 3. **Visualizar Waveforms**:
 
-    ```poweshell
+    ```powershell
     gtkwave mips.vcd mips.gtkw
     ```
 
